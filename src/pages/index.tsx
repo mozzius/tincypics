@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import cuid from "cuid";
+import produce from "immer";
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useState } from "react";
@@ -8,6 +9,7 @@ import { trpc } from "../utils/trpc";
 type Preview = {
   id: string;
   src: string;
+  done: boolean;
 };
 
 const Home: NextPage = () => {
@@ -15,30 +17,51 @@ const Home: NextPage = () => {
   const [previews, setPreviews] = useState<Preview[]>([]);
   const upload = trpc.useMutation(["images.upload"]);
 
-  const onDrogFile = async (evt: React.DragEvent) => {
-    evt.preventDefault();
+  const preventDefaults = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
 
-    const files = evt.dataTransfer.files;
+  const onDrogFile = async (evt: React.DragEvent) => {
+    preventDefaults(evt);
+
+    const files = [...evt.dataTransfer.files].filter((file) =>
+      file.type.startsWith("image/")
+    );
     if (files.length) {
-      const uploadUrls = await upload.mutateAsync({
-        slugs: Array.from({ length: files.length }, () => cuid()),
-      });
-      console.log(uploadUrls)
+      setIsDragging(true)
+      const slugs = Array.from({ length: files.length }, () => cuid());
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        const upload = uploadUrls[i];
-        if (!file || !upload) throw Error("Invalid file or url");
         const reader = new FileReader();
         reader.onload = (e) => {
           const src = e.target?.result as string;
-          setPreviews((prev) => [...prev, { id: upload.slug, src }]);
+          setPreviews(
+            produce((draft) => {
+              draft.push({ id: slugs[i], src, done: false });
+            })
+          );
         };
         reader.readAsDataURL(file);
+      }
+      const uploadUrls = await upload.mutateAsync({
+        slugs,
+      });
+      console.log(uploadUrls);
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const upload = uploadUrls[i];
         const res = await fetch(upload.url, {
           method: "PUT",
           body: file,
         });
         if (!res.ok) throw Error("Failed to upload");
+        setPreviews(
+          produce((draft) => {
+            const index = draft.findIndex((p) => p.id === slugs[i]);
+            draft[index].done = true;
+          })
+        );
       }
     } else {
       setIsDragging(false);
@@ -56,6 +79,10 @@ const Home: NextPage = () => {
         className={`flex h-screen transition-colors duration-500 ${
           isDragging ? "bg-blue-500" : "bg-gray-50"
         }`}
+        onDrop={onDrogFile}
+        onDragOver={preventDefaults}
+        onDrag={preventDefaults}
+        onDragLeave={preventDefaults}
       >
         <div className="m-auto flex w-full max-w-sm flex-col">
           <h1
@@ -71,19 +98,15 @@ const Home: NextPage = () => {
                 isDragging ? "border-blue-500" : "border-slate-200"
               }`}
               onDragOver={(evt) => {
-                evt.preventDefault();
+                preventDefaults(evt);
                 setIsDragging(
                   evt.dataTransfer.items && evt.dataTransfer.items.length > 0
                 );
               }}
-              onDrag={(evt) => {
-                evt.preventDefault();
-              }}
               onDragLeave={(evt) => {
-                evt.preventDefault();
+                preventDefaults(evt);
                 setIsDragging(false);
               }}
-              onDrop={onDrogFile}
             >
               <p className="text-center text-slate-700">
                 Drag and drop your file
@@ -92,16 +115,22 @@ const Home: NextPage = () => {
           </div>
         </div>
         {previews.length > 0 && (
-          <div className="absolute top-0 left-0 h-screen w-full animate-fade overflow-y-auto overflow-x-hidden px-16 backdrop-blur-sm backdrop-brightness-50 transition-all">
+          <div className="absolute top-0 left-0 h-screen w-full animate-fade overflow-y-auto overflow-x-hidden px-16 backdrop-blur-sm backdrop-brightness-90 transition-all">
             {previews.map((preview, i) => (
               <div
                 key={preview.id}
-                className="mt-[20%] flex h-[80%] w-full flex-col items-center"
+                className="mt-[10vw] flex h-[80vw] w-full flex-col items-center"
               >
-                <img className="" src={preview.src} alt="" />
+                <img className="rounded shadow-xl" src={preview.src} alt="" />
                 <div
-                  className="mt-12 max-w-md cursor-pointer rounded bg-white p-4 text-slate-700"
-                  onClick={() => navigator.clipboard.writeText(`https://i.tincy.pics/${preview.id}`)}
+                  className={`mt-12 max-w-md cursor-pointer rounded p-4 text-slate-700 shadow-xl transition-colors ${
+                    preview.done ? "bg-white" : "bg-gray-300"
+                  }`}
+                  onClick={() =>
+                    navigator.clipboard.writeText(
+                      `https://i.tincy.pics/${preview.id}`
+                    )
+                  }
                 >
                   https://i.tincy.pics/{preview.id}
                 </div>
