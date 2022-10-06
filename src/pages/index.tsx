@@ -29,42 +29,58 @@ const Home: NextPage = () => {
     const files = [...evt.dataTransfer.files].filter((file) =>
       file.type.startsWith("image/")
     );
+
     if (files.length) {
-      setIsDragging(true);
-      const slugs = Array.from({ length: files.length }, () => cuid());
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const src = e.target?.result as string;
-          setPreviews(
-            produce((draft) => {
-              draft.push({ id: slugs[i], src, done: false });
-            })
-          );
-        };
-        reader.readAsDataURL(file);
-      }
-      const uploadUrls = await upload.mutateAsync({
-        slugs,
-      });
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const upload = uploadUrls[i];
-        const res = await fetch(upload.url, {
-          method: "PUT",
-          body: file,
-        });
-        if (!res.ok) throw Error("Failed to upload");
-        setPreviews(
-          produce((draft) => {
-            const index = draft.findIndex((p) => p.id === slugs[i]);
-            if (index > -1) draft[index].done = true;
-          })
-        );
-      }
+      uploadFiles(files);
     } else {
       setIsDragging(false);
+    }
+  };
+
+  const onSelectFiles = async (evt: React.ChangeEvent<HTMLInputElement>) => {
+    evt.preventDefault()
+    
+    const files = [...(evt.target.files ?? [])].filter((file) =>
+      file.type.startsWith("image/")
+    );
+    if (files.length) {
+      uploadFiles(files);
+    }
+  };
+
+  const uploadFiles = async (files: File[]) => {
+    setIsDragging(true);
+    const slugs = Array.from({ length: files.length }, () => cuid());
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const src = e.target?.result as string;
+        setPreviews(
+          produce((draft) => {
+            draft.push({ id: slugs[i], src, done: false });
+          })
+        );
+      };
+      reader.readAsDataURL(file);
+    }
+    const uploadUrls = await upload.mutateAsync({
+      slugs,
+    });
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const upload = uploadUrls[i];
+      const res = await fetch(upload.url, {
+        method: "PUT",
+        body: file,
+      });
+      if (!res.ok) throw Error("Failed to upload");
+      setPreviews(
+        produce((draft) => {
+          const index = draft.findIndex((p) => p.id === slugs[i]);
+          if (index > -1) draft[index].done = true;
+        })
+      );
     }
   };
 
@@ -126,7 +142,16 @@ const Home: NextPage = () => {
               }}
             >
               <p className="text-center text-slate-700">
-                Drag and drop your file
+                Drag and drop your images here
+                <label className="block mt-4 bg-blue-500 px-2 py-2 rounded text-white cursor-pointer">
+                  or select images
+                  <input
+                    type="file"
+                    multiple
+                    className="hidden"
+                    onChange={onSelectFiles}
+                  />
+                </label>
               </p>
             </div>
           </div>
