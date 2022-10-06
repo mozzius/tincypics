@@ -12,8 +12,7 @@ datasource db {
 model Image {
     id        Int      @id @default(autoincrement())
     slug      String   @unique
-    url       String
-    caption   String
+    caption   String?
     user      User?    @relation(fields: [userId], references: [id])
     userId    String?
     createdAt DateTime @default(now())

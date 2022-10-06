@@ -12,6 +12,10 @@ export const serverSchema = z.object({
   NEXTAUTH_URL: z.string().url(),
   GITHUB_CLIENT_ID: z.string(),
   GITHUB_CLIENT_SECRET: z.string(),
+  UPLOAD_AWS_REGION: z.string(),
+  UPLOAD_AWS_ACCESS_KEY_ID: z.string(),
+  UPLOAD_AWS_SECRET_ACCESS_KEY: z.string(),
+  UPLOAD_AWS_S3_BUCKET: z.string(),
 });
 
 /**

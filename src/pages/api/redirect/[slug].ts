@@ -25,5 +25,5 @@ export default async function redirectRoute(
   // cache for as long as possible
   res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
 
-  res.redirect(link?.url);
+  res.redirect(`https://i.tincy.pics${link.slug}`);
 }

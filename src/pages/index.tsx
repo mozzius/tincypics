@@ -3,6 +3,7 @@ import cuid from "cuid";
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useState } from "react";
+import { trpc } from "../utils/trpc";
 
 type Preview = {
   id: string;
@@ -12,21 +13,32 @@ type Preview = {
 const Home: NextPage = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [previews, setPreviews] = useState<Preview[]>([]);
+  const upload = trpc.useMutation(["images.upload"]);
 
-  const onDrogFile = (evt: React.DragEvent) => {
+  const onDrogFile = async (evt: React.DragEvent) => {
     evt.preventDefault();
 
     const files = evt.dataTransfer.files;
     if (files.length) {
-      console.log(files);
-      for (const file of files) {
-        const id = cuid();
+      const uploadUrls = await upload.mutateAsync({
+        slugs: Array.from({ length: files.length }, () => cuid()),
+      });
+      console.log(uploadUrls)
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const upload = uploadUrls[i];
+        if (!file || !upload) throw Error("Invalid file or url");
         const reader = new FileReader();
         reader.onload = (e) => {
           const src = e.target?.result as string;
-          setPreviews((prev) => [...prev, { id, src }]);
+          setPreviews((prev) => [...prev, { id: upload.slug, src }]);
         };
         reader.readAsDataURL(file);
+        const res = await fetch(upload.url, {
+          method: "PUT",
+          body: file,
+        });
+        if (!res.ok) throw Error("Failed to upload");
       }
     } else {
       setIsDragging(false);
@@ -89,9 +101,9 @@ const Home: NextPage = () => {
                 <img className="" src={preview.src} alt="" />
                 <div
                   className="mt-12 max-w-md cursor-pointer rounded bg-white p-4 text-slate-700"
-                  onClick={() => navigator.clipboard.writeText(preview.src)}
+                  onClick={() => navigator.clipboard.writeText(`https://i.tincy.pics/${preview.id}`)}
                 >
-                  https://tincy.pics/i/{preview.id}
+                  https://i.tincy.pics/{preview.id}
                 </div>
               </div>
             ))}
