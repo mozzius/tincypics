@@ -4,6 +4,7 @@ import produce from "immer";
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useState } from "react";
+import { FiCopy as CopyIcon, FiXCircle as CloseIcon } from "react-icons/fi";
 import { trpc } from "../utils/trpc";
 
 type Preview = {
@@ -47,7 +48,6 @@ const Home: NextPage = () => {
       const uploadUrls = await upload.mutateAsync({
         slugs,
       });
-      console.log(uploadUrls);
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const upload = uploadUrls[i];
@@ -59,7 +59,7 @@ const Home: NextPage = () => {
         setPreviews(
           produce((draft) => {
             const index = draft.findIndex((p) => p.id === slugs[i]);
-            draft[index].done = true;
+            if (index > -1) draft[index].done = true;
           })
         );
       }
@@ -133,14 +133,21 @@ const Home: NextPage = () => {
         </div>
         {previews.length > 0 && (
           <div className="absolute top-0 left-0 h-screen w-full animate-fade overflow-y-auto overflow-x-hidden px-16 backdrop-blur-sm backdrop-brightness-90 transition-all">
+            <CloseIcon
+              className="fixed top-4 right-4 cursor-pointer text-4xl text-white"
+              onClick={() => {
+                setPreviews([]);
+                setIsDragging(false);
+              }}
+            />
             {previews.map((preview, i) => (
               <div
                 key={preview.id}
-                className="mt-[10vw] flex h-[80vw] w-full flex-col items-center"
+                className=" mx-auto flex h-screen w-full max-w-3xl flex-col items-center justify-center"
               >
                 <img className="rounded shadow-xl" src={preview.src} alt="" />
                 <div
-                  className={`mt-12 max-w-md cursor-pointer rounded p-4 text-slate-700 shadow-xl transition-colors ${
+                  className={`mt-12 flex cursor-pointer items-center rounded p-4 text-slate-700 shadow-xl transition-colors ${
                     preview.done ? "bg-white" : "bg-gray-300"
                   }`}
                   onClick={() =>
@@ -150,6 +157,7 @@ const Home: NextPage = () => {
                   }
                 >
                   https://i.tincy.pics/{preview.id}
+                  <CopyIcon className="ml-4" />
                 </div>
               </div>
             ))}
