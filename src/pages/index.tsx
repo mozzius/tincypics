@@ -2,9 +2,11 @@
 import cuid from "cuid";
 import produce from "immer";
 import type { NextPage } from "next";
-import Head from "next/head";
+import { signIn, useSession } from "next-auth/react";
 import { useState } from "react";
 import { FiCopy as CopyIcon, FiXCircle as CloseIcon } from "react-icons/fi";
+import { SiGithub as GithubIcon } from "react-icons/si";
+import { ProfilePic } from "../components/ProfilePic";
 import { trpc } from "../utils/trpc";
 
 type Preview = {
@@ -17,6 +19,7 @@ const Home: NextPage = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [previews, setPreviews] = useState<Preview[]>([]);
   const upload = trpc.useMutation(["images.upload"]);
+  const session = useSession();
 
   const preventDefaults = (e: React.DragEvent) => {
     e.preventDefault();
@@ -38,8 +41,8 @@ const Home: NextPage = () => {
   };
 
   const onSelectFiles = async (evt: React.ChangeEvent<HTMLInputElement>) => {
-    evt.preventDefault()
-    
+    evt.preventDefault();
+
     const files = [...(evt.target.files ?? [])].filter((file) =>
       file.type.startsWith("image/")
     );
@@ -85,111 +88,99 @@ const Home: NextPage = () => {
   };
 
   return (
-    <>
-      <Head>
-        <title>Tincy Pics</title>
-        <meta name="description" content="A tincy wincy image host" />
-        <link
-          rel="apple-touch-icon"
-          sizes="180x180"
-          href="/apple-touch-icon.png"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="32x32"
-          href="/favicon-32x32.png"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="16x16"
-          href="/favicon-16x16.png"
-        />
-        <link rel="manifest" href="/site.webmanifest" />
-      </Head>
-      <main
-        className={`flex h-screen transition-colors duration-500 ${
-          isDragging ? "bg-blue-500" : "bg-gray-50"
-        }`}
-        onDrop={onDrogFile}
-        onDragOver={preventDefaults}
-        onDrag={preventDefaults}
-        onDragLeave={preventDefaults}
-      >
-        <div className="m-auto flex w-full max-w-sm flex-col">
-          <h1
-            className={`text-center text-xl font-semibold transition-colors duration-500 ${
-              isDragging ? "text-white" : "text-slate-700"
+    <main
+      className={`flex h-screen transition-colors duration-500 ${
+        isDragging ? "bg-blue-500" : "bg-gray-50"
+      }`}
+      onDrop={onDrogFile}
+      onDragOver={preventDefaults}
+      onDrag={preventDefaults}
+      onDragLeave={preventDefaults}
+    >
+      <ProfilePic />
+      <div className="m-auto flex w-full max-w-sm flex-col">
+        <h1
+          className={`text-center text-xl font-semibold transition-colors duration-500 ${
+            isDragging ? "text-white" : "text-slate-700"
+          }`}
+        >
+          tincy.pics
+        </h1>
+        <div className="mt-2 flex w-full flex-col rounded bg-white p-2 shadow-lg">
+          <div
+            className={`flex h-32 w-full flex-col items-center justify-center border-4 border-dashed transition-colors duration-200 ${
+              isDragging ? "border-blue-500" : "border-slate-200"
             }`}
+            onDragOver={(evt) => {
+              preventDefaults(evt);
+              setIsDragging(
+                evt.dataTransfer.items && evt.dataTransfer.items.length > 0
+              );
+            }}
+            onDragLeave={(evt) => {
+              preventDefaults(evt);
+              setIsDragging(false);
+            }}
           >
-            tincy.pics
-          </h1>
-          <div className="mt-2 flex w-full flex-col rounded bg-white p-2 shadow-lg">
-            <div
-              className={`flex h-32 w-full flex-col items-center justify-center border-4 border-dashed transition-colors duration-200 ${
-                isDragging ? "border-blue-500" : "border-slate-200"
-              }`}
-              onDragOver={(evt) => {
-                preventDefaults(evt);
-                setIsDragging(
-                  evt.dataTransfer.items && evt.dataTransfer.items.length > 0
-                );
-              }}
-              onDragLeave={(evt) => {
-                preventDefaults(evt);
-                setIsDragging(false);
-              }}
-            >
-              <p className="text-center text-slate-700">
-                Drag and drop your images here
-                <label className="block mt-4 bg-blue-500 px-2 py-2 rounded text-white cursor-pointer">
-                  or select images
-                  <input
-                    type="file"
-                    multiple
-                    className="hidden"
-                    onChange={onSelectFiles}
-                  />
-                </label>
-              </p>
-            </div>
+            <p className="text-center text-slate-700">
+              Drag and drop your images here
+              <label className="mt-4 block cursor-pointer rounded bg-blue-500 px-2 py-2 text-white">
+                or select images
+                <input
+                  type="file"
+                  multiple
+                  className="hidden"
+                  onChange={onSelectFiles}
+                />
+              </label>
+            </p>
           </div>
         </div>
-        {previews.length > 0 && (
-          <div className="absolute top-0 left-0 h-screen w-full animate-fade overflow-y-auto overflow-x-hidden px-16 backdrop-blur-sm backdrop-brightness-90 transition-all">
-            <CloseIcon
-              className="fixed top-4 right-4 cursor-pointer text-4xl text-white"
-              onClick={() => {
-                setPreviews([]);
-                setIsDragging(false);
-              }}
-            />
-            {previews.map((preview, i) => (
-              <div
-                key={preview.id}
-                className=" mx-auto flex h-screen w-full max-w-3xl flex-col items-center justify-center"
-              >
-                <img className="rounded shadow-xl" src={preview.src} alt="" />
-                <div
-                  className={`mt-12 flex cursor-pointer items-center rounded p-4 text-slate-700 shadow-xl transition-colors ${
-                    preview.done ? "bg-white" : "bg-gray-300"
-                  }`}
-                  onClick={() =>
-                    navigator.clipboard.writeText(
-                      `https://i.tincy.pics/${preview.id}`
-                    )
-                  }
-                >
-                  https://i.tincy.pics/{preview.id}
-                  <CopyIcon className="ml-4" />
-                </div>
-              </div>
-            ))}
-          </div>
+        {session.status === "unauthenticated" ? (
+          <button
+            className="mt-4 flex w-full cursor-pointer items-center justify-center rounded bg-stone-900 py-2 text-center text-white"
+            onClick={() => signIn("github")}
+          >
+            <GithubIcon className="mr-2" />
+            Sign in with Github
+          </button>
+        ) : (
+          <div className="mt-2">&nbsp;</div>
         )}
-      </main>
-    </>
+      </div>
+      {previews.length > 0 && (
+        <div className="absolute top-0 left-0 h-screen w-full animate-fade overflow-y-auto overflow-x-hidden px-16 backdrop-blur-sm backdrop-brightness-90 transition-all">
+          <CloseIcon
+            className="fixed top-4 right-4 cursor-pointer text-4xl text-white"
+            onClick={() => {
+              setPreviews([]);
+              setIsDragging(false);
+            }}
+          />
+          {previews.map((preview, i) => (
+            <div
+              key={preview.id}
+              className=" mx-auto flex h-screen w-full max-w-3xl flex-col items-center justify-center"
+            >
+              <img className="rounded shadow-xl" src={preview.src} alt="" />
+              <div
+                className={`mt-12 flex cursor-pointer items-center rounded p-4 text-slate-700 shadow-xl transition-colors ${
+                  preview.done ? "bg-white" : "bg-gray-300"
+                }`}
+                onClick={() =>
+                  navigator.clipboard.writeText(
+                    `https://i.tincy.pics/${preview.id}`
+                  )
+                }
+              >
+                https://i.tincy.pics/{preview.id}
+                <CopyIcon className="ml-4" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </main>
   );
 };
 
