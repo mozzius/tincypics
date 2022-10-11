@@ -11,7 +11,11 @@ import { trpc } from "../../utils/trpc";
 const ProfilePage: NextPage = () => {
   const { query } = useRouter();
   const profile = trpc.useQuery(["user.profile", { id: query.id as string }]);
-  const deleteImg = trpc.useMutation(["images.delete"]);
+  const deleteImg = trpc.useMutation(["images.delete"], {
+    onSuccess() {
+      profile.refetch();
+    },
+  });
   const session = useSession();
 
   const isMe = session.data?.user?.id === query.id;
@@ -56,7 +60,7 @@ const ProfilePage: NextPage = () => {
                     alt=""
                     className="w-fill rounded shadow"
                   />
-                  <div className="justify-end mt-4 flex ">
+                  <div className="mt-4 flex justify-end ">
                     <div
                       className="flex h-12 w-12 cursor-pointer items-center rounded p-4 text-slate-700 shadow"
                       onClick={() =>
@@ -69,10 +73,7 @@ const ProfilePage: NextPage = () => {
                     </div>
                     <div
                       className="ml-4 flex h-12 w-12 cursor-pointer items-center rounded p-4 text-slate-700 shadow"
-                      onClick={async () => {
-                        await deleteImg.mutateAsync({ id: image.id });
-                        await profile.refetch();
-                      }}
+                      onClick={() => deleteImg.mutate({ id: image.id })}
                     >
                       <DeleteIcon />
                     </div>

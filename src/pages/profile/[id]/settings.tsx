@@ -8,27 +8,29 @@ import { ProfileHeader } from "../../../components/ProfileHeader";
 import { trpc } from "../../../utils/trpc";
 
 const ProfilePage: NextPage = () => {
-  const { query } = useRouter();
+  const { query, replace } = useRouter();
   const profile = trpc.useQuery(["user.profile", { id: query.id as string }]);
   const session = useSession({
     required: true,
+    onUnauthenticated() {
+      replace("/");
+    },
   });
 
-  const authenticated =
-    session.status === "authenticated" && session.data?.user?.id !== query.id;
+  const isMe = session.data?.user?.id === query.id;
 
   useEffect(() => {
-    if (authenticated) {
-      signOut();
+    if (session.status === "authenticated" && !isMe) {
+      replace("/");
     }
-  }, [authenticated]);
+  }, [isMe, replace, session.status]);
 
   if (profile.data === null) {
     return <div>Not found</div>;
   }
 
   return (
-    <main className="flex h-screen flex-col">
+    <main className="flex h-screen flex-col px-4">
       <ProfileHeader user={profile.data} />
       <div className="m-auto flex w-full max-w-screen-lg flex-grow">
         <nav className="w-64 flex-shrink-0">
@@ -50,7 +52,14 @@ const ProfilePage: NextPage = () => {
           </ul>
         </nav>
         <section>
-          {authenticated && <button onClick={() => signOut()}>Log out</button>}
+          {isMe && (
+            <button
+              onClick={() => signOut()}
+              className="rounded bg-blue-400 px-4 py-1 text-white"
+            >
+              Log out
+            </button>
+          )}
         </section>
       </div>
     </main>
