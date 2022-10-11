@@ -17,8 +17,8 @@ export const ProfilePic = () => {
         query: { id: data.user.id },
       }}
     >
-      <a className="fixed top-10 right-10">
-        <img src={image} alt={name} className="h-16 w-16 rounded-full" />
+      <a className="fixed top-6 right-6">
+        <img src={image} alt={name} className="h-8 w-8 rounded-full" />
       </a>
     </Link>
   );
