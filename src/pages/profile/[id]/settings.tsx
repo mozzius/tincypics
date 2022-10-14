@@ -9,7 +9,9 @@ import { trpc } from "../../../utils/trpc";
 
 const ProfilePage: NextPage = () => {
   const { query, replace } = useRouter();
-  const profile = trpc.useQuery(["user.profile", { id: query.id as string }]);
+  const profile = trpc.user.profile.useQuery(query.id as string, {
+    enabled: !!query.id,
+  });
   const session = useSession({
     required: true,
     onUnauthenticated() {

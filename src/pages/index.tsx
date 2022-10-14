@@ -6,6 +6,7 @@ import { signIn, useSession } from "next-auth/react";
 import { useState } from "react";
 import { FiCopy as CopyIcon, FiXCircle as CloseIcon } from "react-icons/fi";
 import { SiGithub as GithubIcon } from "react-icons/si";
+import { number } from "zod";
 import { ProfilePic } from "../components/ProfilePic";
 import { trpc } from "../utils/trpc";
 
@@ -18,7 +19,7 @@ type Preview = {
 const Home: NextPage = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [previews, setPreviews] = useState<Preview[]>([]);
-  const upload = trpc.useMutation(["images.upload"]);
+  const upload = trpc.images.upload.useMutation();
   const session = useSession();
 
   const preventDefaults = (e: React.DragEvent) => {
@@ -53,23 +54,37 @@ const Home: NextPage = () => {
 
   const uploadFiles = async (files: File[]) => {
     setIsDragging(true);
-    const slugs = Array.from({ length: files.length }, () => cuid());
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const src = e.target?.result as string;
-        setPreviews(
-          produce((draft) => {
-            draft.push({ id: slugs[i], src, done: false });
-          })
-        );
-      };
-      reader.readAsDataURL(file);
-    }
-    const uploadUrls = await upload.mutateAsync({
-      slugs,
-    });
+    // 1. generate id
+    // 2. read file and set preview
+    // 3. find width and height
+    const images = await Promise.all(
+      Array.from({ length: files.length }, async (_, i) => {
+        const id = cuid();
+        const file = files[i];
+        const { width, height } = await new Promise<{
+          width: number;
+          height: number;
+        }>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const src = e.target?.result as string;
+            setPreviews(
+              produce((draft) => {
+                draft.push({ id, src, done: false });
+              })
+            );
+            const img = new Image();
+            img.onload = () =>
+              resolve({ width: img.width, height: img.height });
+            img.src = src;
+          };
+          reader.readAsDataURL(file);
+        });
+        return { slug: id, width, height };
+      })
+    );
+    for (let i = 0; i < files.length; i++) {}
+    const uploadUrls = await upload.mutateAsync(images);
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const upload = uploadUrls[i];
@@ -80,7 +95,7 @@ const Home: NextPage = () => {
       if (!res.ok) throw Error("Failed to upload");
       setPreviews(
         produce((draft) => {
-          const index = draft.findIndex((p) => p.id === slugs[i]);
+          const index = draft.findIndex((p) => p.id === images[i].slug);
           if (index > -1) draft[index].done = true;
         })
       );
@@ -90,7 +105,7 @@ const Home: NextPage = () => {
   return (
     <main
       className={`flex h-screen transition-colors duration-500 ${
-        isDragging ? "bg-blue-500" : "bg-gray-50"
+        isDragging ? "bg-blue-200" : "bg-gray-50"
       }`}
       onDrop={onDrogFile}
       onDragOver={preventDefaults}
@@ -124,7 +139,7 @@ const Home: NextPage = () => {
           >
             <p className="text-center text-slate-700">
               Drag and drop your images here
-              <label className="mt-4 block cursor-pointer rounded bg-blue-500 px-2 py-2 text-white">
+              <label className="mt-4 block cursor-pointer rounded bg-blue-200 px-2 py-2">
                 or select images
                 <input
                   type="file"

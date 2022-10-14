@@ -1,8 +1,8 @@
-import { createRouter } from "./context";
 import { z } from "zod";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { env } from "../../env/server.mjs";
+import { env } from "../../../env/server.mjs";
+import { protectedProcedure, publicProcedure, router } from "../trpc";
 
 const client = new S3Client({
   region: env.UPLOAD_AWS_REGION,
@@ -12,16 +12,22 @@ const client = new S3Client({
   },
 });
 
-export const imagesRouter = createRouter()
-  .mutation("upload", {
-    input: z.object({
-      slugs: z.string().array(),
-    }),
-    async resolve({ ctx, input }) {
+export const imagesRouter = router({
+  upload: publicProcedure
+    .input(
+      z
+        .object({
+          slug: z.string(),
+          width: z.number(),
+          height: z.number(),
+        })
+        .array()
+    )
+    .mutation(async ({ ctx, input }) => {
       const userId = ctx.session?.user?.id;
       const [urls] = await Promise.all([
         await Promise.all(
-          input.slugs.map(async (slug) => {
+          input.map(async ({ slug }) => {
             const command = new PutObjectCommand({
               Bucket: env.UPLOAD_AWS_S3_BUCKET,
               Key: slug,
@@ -33,32 +39,38 @@ export const imagesRouter = createRouter()
           })
         ),
         await ctx.prisma.image.createMany({
-          data: input.slugs.map((slug) => ({
-            slug,
+          data: input.map((images) => ({
+            ...images,
             userId,
           })),
         }),
       ]);
       return urls;
-    },
-  })
-  .mutation("delete", {
-    input: z.object({
-      id: z.number(),
     }),
-    async resolve({ ctx, input }) {
-      const userId = ctx.session?.user?.id;
-      if (!userId) throw new Error("Not logged in");
+  get: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
+    const image = await ctx.prisma.image.findUnique({
+      where: { slug: input },
+      include: { user: true },
+    });
+    if (!image) {
+      throw new Error("Image not found");
+    }
+    return image;
+  }),
+  delete: protectedProcedure
+    .input(z.number())
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
       const image = await ctx.prisma.image.findUnique({
-        where: { id: input.id },
+        where: { id: input },
       });
       if (!image) throw new Error("Image not found");
-      if (image.userId !== userId) throw new Error("Not authorized");
+      if (image.userId !== userId) throw new Error("Not your image");
       await ctx.prisma.image.delete({
         where: {
-          id: input.id,
+          id: input,
         },
       });
       return true;
-    },
-  });
+    }),
+});

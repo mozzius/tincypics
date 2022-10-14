@@ -5,7 +5,7 @@ import { withTRPC } from "@trpc/next";
 import { SessionProvider } from "next-auth/react";
 import superjson from "superjson";
 import type { AppType } from "next/app";
-import type { AppRouter } from "../server/router";
+import type { AppRouter } from "../server/trpc/router";
 import type { Session } from "next-auth";
 import "../styles/globals.css";
 import Head from "next/head";
