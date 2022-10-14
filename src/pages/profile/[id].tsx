@@ -70,7 +70,7 @@ const ProfilePage: NextPage = () => {
                   <img
                     src={`https://i.tincy.pics/${image.slug}`}
                     alt=""
-                    className="h-full w-full object-cover transition-transform hover:scale-105"
+                    className="h-full w-full object-cover transition-transform hover:scale-105 bg-slate-100"
                   />
                 </a>
               </Link>

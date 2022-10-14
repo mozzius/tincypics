@@ -1,5 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
+import { FiChevronLeft as BackIcon } from "react-icons/fi";
 import { Image, User } from "@prisma/client";
+import Link from "next/link";
 
 interface Props {
   user?: User & { images: Image[] };
@@ -7,7 +9,12 @@ interface Props {
 
 export const ProfileHeader = ({ user }: Props) => {
   return (
-    <header className="m-auto mt-32 mb-4 flex w-full max-w-screen-lg items-end border-b-4 border-blue-400 pb-6">
+    <header className="m-auto mt-32 mb-4 flex w-full max-w-screen-lg items-end border-b-4 border-blue-400 pb-6 ">
+      <Link href="/">
+        <a className="absolute top-4 cursor-pointer rounded-full p-2 transition-colors hover:bg-slate-100">
+          <BackIcon className="h-6 w-6" />
+        </a>
+      </Link>
       {user ? (
         <>
           <img

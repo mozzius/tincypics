@@ -3,7 +3,11 @@ import { NextPage } from "next";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { FiCopy as CopyIcon, FiTrash2 as DeleteIcon } from "react-icons/fi";
+import {
+  FiCopy as CopyIcon,
+  FiTrash2 as DeleteIcon,
+  FiChevronLeft as BackIcon,
+} from "react-icons/fi";
 
 import { ProfileHeader } from "../../components/ProfileHeader";
 import { trpc } from "../../utils/trpc";
@@ -28,6 +32,11 @@ const ImagePage: NextPage = () => {
   return (
     <main className="flex h-screen flex-col px-4">
       <div className="m-auto flex w-full max-w-screen-lg flex-grow flex-col p-16">
+        <Link href="/">
+          <a className="absolute top-4 cursor-pointer rounded-full p-2 transition-colors hover:bg-slate-100">
+            <BackIcon className="h-6 w-6" />
+          </a>
+        </Link>
         <img
           className="rounded shadow"
           src={`https://i.tincy.pics/${image.data.slug}`}
@@ -46,7 +55,7 @@ const ImagePage: NextPage = () => {
               >
                 {image.data.user.image && (
                   <img
-                    className="rounded-full w-6 h-6 mr-4"
+                    className="mr-4 h-6 w-6 rounded-full"
                     src={image.data.user.image}
                     alt={image.data.user.name ?? ""}
                   />

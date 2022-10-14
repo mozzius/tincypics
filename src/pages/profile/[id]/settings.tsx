@@ -35,7 +35,7 @@ const ProfilePage: NextPage = () => {
     <main className="flex h-screen flex-col px-4">
       <ProfileHeader user={profile.data} />
       <div className="m-auto flex w-full max-w-screen-lg flex-grow">
-        <nav className="w-64 flex-shrink-0">
+        <nav className="w-48 flex-shrink-0">
           <ul className="mr-4 list-none">
             <li className="w-full">
               <Link href={{ pathname: "/profile/[id]", query }}>
