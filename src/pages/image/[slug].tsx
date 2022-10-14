@@ -9,18 +9,19 @@ import {
   FiChevronLeft as BackIcon,
 } from "react-icons/fi";
 
-import { ProfileHeader } from "../../components/ProfileHeader";
 import { trpc } from "../../utils/trpc";
 
 const ImagePage: NextPage = () => {
-  const { query } = useRouter();
+  const { query, back } = useRouter();
   const image = trpc.images.get.useQuery(query.slug as string, {
     enabled: !!query.slug,
   });
-  const deleteImg = trpc.images.delete.useMutation();
+  const deleteImg = trpc.images.delete.useMutation({
+    onSuccess: back,
+  });
   const session = useSession();
 
-  const isMe = session.data?.user?.id === query.slug;
+  const isMe = session.data?.user?.id === image.data?.userId;
 
   if (image.data === null) {
     return <div>Not found</div>;
@@ -75,12 +76,14 @@ const ImagePage: NextPage = () => {
           >
             <CopyIcon />
           </div>
-          <div
-            className="ml-4 flex h-12 w-12 cursor-pointer items-center rounded p-4 text-slate-700 shadow"
-            onClick={() => deleteImg.mutate(image.data.id)}
-          >
-            <DeleteIcon />
-          </div>
+          {isMe && (
+            <div
+              className="ml-4 flex h-12 w-12 cursor-pointer items-center rounded p-4 text-slate-700 shadow"
+              onClick={() => deleteImg.mutate(image.data.id)}
+            >
+              <DeleteIcon />
+            </div>
+          )}
         </div>
       </div>
     </main>
