@@ -3,7 +3,6 @@ import { NextPage } from "next";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { FiCopy as CopyIcon, FiTrash2 as DeleteIcon } from "react-icons/fi";
 
 import { ProfileHeader } from "../../components/ProfileHeader";
 import { trpc } from "../../utils/trpc";
@@ -70,7 +69,7 @@ const ProfilePage: NextPage = () => {
                   <img
                     src={`https://i.tincy.pics/${image.slug}`}
                     alt=""
-                    className="h-full w-full object-cover transition-transform hover:scale-105 bg-slate-100"
+                    className="h-full w-full bg-slate-100 object-cover transition-transform hover:scale-105"
                   />
                 </a>
               </Link>
