@@ -6,9 +6,9 @@ import { signIn, useSession } from "next-auth/react";
 import { useState } from "react";
 import { FiCopy as CopyIcon, FiXCircle as CloseIcon } from "react-icons/fi";
 import { SiGithub as GithubIcon } from "react-icons/si";
-import { number } from "zod";
 import { ProfilePic } from "../components/ProfilePic";
 import { trpc } from "../utils/trpc";
+import QRCode from "react-qr-code";
 
 type Preview = {
   id: string;
@@ -172,24 +172,29 @@ const Home: NextPage = () => {
               setIsDragging(false);
             }}
           />
-          {previews.map((preview, i) => (
+          {previews.map((preview) => (
             <div
               key={preview.id}
-              className=" mx-auto flex h-screen w-full max-w-3xl flex-col items-center justify-center"
+              className="mx-auto mt-12 flex items-center gap-2"
             >
-              <img className="rounded shadow-xl" src={preview.src} alt="" />
-              <div
-                className={`mt-12 flex cursor-pointer items-center rounded p-4 text-slate-700 shadow-xl transition-colors ${
-                  preview.done ? "bg-white" : "bg-gray-300"
-                }`}
-                onClick={() =>
-                  navigator.clipboard.writeText(
-                    `https://i.tincy.pics/${preview.id}`
-                  )
-                }
-              >
-                https://i.tincy.pics/{preview.id}
-                <CopyIcon className="ml-4" />
+              <div className="h-14 w-14 rounded bg-white p-2">
+                <QRCode value={`https://tincy.pics/${preview.id}`} size={32} />
+              </div>
+              <div className="flex h-screen w-full max-w-3xl flex-col items-center justify-center">
+                <img className="rounded shadow-xl" src={preview.src} alt="" />
+                <div
+                  className="flex cursor-pointer items-center rounded bg-white p-4 text-slate-700 shadow-xl"
+                  onClick={() =>
+                    navigator.clipboard.writeText(
+                      `https://i.tincy.pics/${preview.id}`
+                    )
+                  }
+                >
+                  {preview.done
+                    ? `https://i.tincy.pics/${preview.id}`
+                    : "Uploading..."}
+                  <CopyIcon className="ml-4" />
+                </div>
               </div>
             </div>
           ))}
