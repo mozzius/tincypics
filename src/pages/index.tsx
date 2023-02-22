@@ -182,7 +182,7 @@ const Home: NextPage = () => {
                 <div className="h-14 w-14 rounded bg-white p-2">
                   <QRCode
                     value={`https://tincy.pics/${preview.id}`}
-                    size={32}
+                    size={64}
                     className="h-full w-full"
                   />
                 </div>
