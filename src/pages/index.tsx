@@ -175,16 +175,15 @@ const Home: NextPage = () => {
           {previews.map((preview) => (
             <div
               key={preview.id}
-              className="flex h-screen w-full max-w-3xl flex-col items-center justify-center"
+              className="mx-auto flex h-screen w-full max-w-3xl flex-col items-center justify-center"
             >
               <img className="rounded shadow-xl" src={preview.src} alt="" />
-              <div className="mx-auto mt-12 flex items-center gap-2">
+              <div className="mt-12 flex items-center gap-2">
                 <div className="h-14 w-14 rounded bg-white p-2">
                   <QRCode
                     value={`https://tincy.pics/${preview.id}`}
                     size={32}
-                    width="100%"
-                    height="100%"
+                    className="h-full w-full"
                   />
                 </div>
                 <div
