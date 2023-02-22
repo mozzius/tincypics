@@ -187,7 +187,7 @@ const Home: NextPage = () => {
                   />
                 </div>
                 <div
-                  className="flex cursor-pointer items-center rounded bg-white p-4 text-slate-700 shadow-xl"
+                  className="flex cursor-pointer items-center rounded bg-white p-4 text-slate-700 shadow-xl w-[450px]"
                   onClick={() =>
                     navigator.clipboard.writeText(
                       `https://i.tincy.pics/${preview.id}`
