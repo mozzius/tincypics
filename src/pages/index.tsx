@@ -181,7 +181,7 @@ const Home: NextPage = () => {
               <div className="mt-12 flex items-center gap-2">
                 <div className="h-14 w-14 rounded bg-white p-2">
                   <QRCode
-                    value={`https://tincy.pics/${preview.id}`}
+                    value={`https://tincy.pics/image/${preview.id}`}
                     size={64}
                     className="h-full w-full"
                   />
