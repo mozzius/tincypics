@@ -1,0 +1,37 @@
+{
+  "name": "tincypics",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "main": "worker.ts",
+  "define": {
+    "process.env.REMIX_DEV_SERVER_WS_PORT": "8002"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "name": "tincypics-db",
+      "database_id": "cd7d5db9-05f2-4d11-875a-05b921cce0ca"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "BUCKET",
+      "bucket_name": "tincypics-bucket",
+      "preview_bucket_name": "BUCKET"
+    }
+  ],
+  "queues": {
+    "producers": [
+      {
+        "queue": "tincypics-queue",
+        "binding": "QUEUE"
+      }
+    ],
+    "consumers": [
+      {
+        "queue": "tincypics-queue"
+      }
+    ]
+  }
+}

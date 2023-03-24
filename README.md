@@ -1,3 +1,7 @@
-# Tincy Pics
+# Superflare + Remix
 
-TODO: https://github.com/rodrigopivi/aws_resize_boilerplate
+This is a template for using Superflare + Remix.
+
+```bash
+npm run dev
+```
