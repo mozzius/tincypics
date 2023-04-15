@@ -16,10 +16,9 @@ export const ProfilePic = () => {
         pathname: "/profile/[id]",
         query: { id: data.user.id },
       }}
+      className="fixed right-6 top-6"
     >
-      <a className="fixed top-6 right-6">
-        <img src={image} alt={name} className="h-8 w-8 rounded-full" />
-      </a>
+      <img src={image} alt={name} className="h-8 w-8 rounded-full" />
     </Link>
   );
 };

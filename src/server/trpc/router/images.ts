@@ -71,6 +71,23 @@ export const imagesRouter = router({
           id: input,
         },
       });
-      return true;
+      return image;
+    }),
+
+  deleteBySlug: protectedProcedure
+    .input(z.string())
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const image = await ctx.prisma.image.findUnique({
+        where: { slug: input },
+      });
+      if (!image) throw new Error("Image not found");
+      if (image.userId !== userId) throw new Error("Not your image");
+      await ctx.prisma.image.delete({
+        where: {
+          slug: input,
+        },
+      });
+      return image;
     }),
 });

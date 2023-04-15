@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
-import { ProfileHeader } from "../../components/ProfileHeader";
+import { ProfileHeader } from "../../components/profile-header";
 import { trpc } from "../../utils/trpc";
 
 const ProfilePage: NextPage = () => {
@@ -27,22 +27,24 @@ const ProfilePage: NextPage = () => {
   return (
     <main className="flex h-screen flex-col px-4">
       <ProfileHeader user={profile.data} />
-      <div className="m-auto flex w-full max-w-screen-lg flex-grow">
+      <div className="mx-auto flex w-full max-w-4xl container flex-grow px-4">
         <nav className="w-48 flex-shrink-0">
           <ul className="mr-4 list-none">
             <li className="w-full">
-              <Link href={{ pathname: "/profile/[id]", query }}>
-                <a className="inline-block w-full cursor-pointer rounded bg-blue-200 px-2 py-1">
-                  Pics
-                </a>
+              <Link
+                href={{ pathname: "/profile/[id]", query }}
+                className="inline-block w-full cursor-pointer rounded bg-blue-200 px-2 py-1"
+              >
+                Pics
               </Link>
             </li>
             {isMe && (
               <li className="mt-1 w-full">
-                <Link href={{ pathname: "/profile/[id]/settings", query }}>
-                  <a className="inline-block w-full cursor-pointer rounded px-2 py-1 transition-colors hover:bg-slate-50">
-                    Settings
-                  </a>
+                <Link
+                  href={{ pathname: "/profile/[id]/settings", query }}
+                  className="inline-block w-full cursor-pointer rounded px-2 py-1 transition-colors hover:bg-slate-50"
+                >
+                  Settings
                 </Link>
               </li>
             )}
@@ -64,14 +66,13 @@ const ProfilePage: NextPage = () => {
                 key={image.id}
                 href={`/profile/${query.id}?activeImage=${image.slug}`}
                 as={`/image/${image.slug}`}
+                className="aspect-square cursor-pointer overflow-hidden rounded shadow"
               >
-                <a className="aspect-square cursor-pointer overflow-hidden rounded shadow">
-                  <img
-                    src={`https://i.tincy.pics/${image.slug}`}
-                    alt=""
-                    className="h-full w-full bg-slate-100 object-cover transition-transform hover:scale-105"
-                  />
-                </a>
+                <img
+                  src={`https://i.tincy.pics/${image.slug}`}
+                  alt=""
+                  className="h-full w-full bg-slate-100 object-cover transition-transform hover:scale-105"
+                />
               </Link>
             ))
           )}

@@ -4,7 +4,7 @@ import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
-import { ProfileHeader } from "../../../components/ProfileHeader";
+import { ProfileHeader } from "../../../components/profile-header";
 import { trpc } from "../../../utils/trpc";
 
 const ProfilePage: NextPage = () => {
@@ -34,21 +34,23 @@ const ProfilePage: NextPage = () => {
   return (
     <main className="flex h-screen flex-col px-4">
       <ProfileHeader user={profile.data} />
-      <div className="m-auto flex w-full max-w-screen-lg flex-grow">
+      <div className="container mx-auto flex w-full max-w-4xl flex-grow px-4">
         <nav className="w-48 flex-shrink-0">
           <ul className="mr-4 list-none">
             <li className="w-full">
-              <Link href={{ pathname: "/profile/[id]", query }}>
-                <a className="inline-block w-full cursor-pointer rounded px-2 py-1 transition-colors hover:bg-slate-50">
-                  Pics
-                </a>
+              <Link
+                href={{ pathname: "/profile/[id]", query }}
+                className="inline-block w-full cursor-pointer rounded px-2 py-1 transition-colors hover:bg-slate-50"
+              >
+                Pics
               </Link>
             </li>
             <li className="mt-1 w-full">
-              <Link href={{ pathname: "/profile/[id]/settings", query }}>
-                <a className="inline-block w-full cursor-pointer rounded bg-blue-200 px-2 py-1">
-                  Settings
-                </a>
+              <Link
+                href={{ pathname: "/profile/[id]/settings", query }}
+                className="inline-block w-full cursor-pointer rounded bg-blue-200 px-2 py-1"
+              >
+                Settings
               </Link>
             </li>
           </ul>

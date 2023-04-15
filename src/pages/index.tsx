@@ -4,10 +4,11 @@ import produce from "immer";
 import type { NextPage } from "next";
 import { signIn, useSession } from "next-auth/react";
 import { useState } from "react";
-import { FiCopy as CopyIcon, FiXCircle as CloseIcon } from "react-icons/fi";
-import { SiGithub as GithubIcon } from "react-icons/si";
-import { ProfilePic } from "../components/ProfilePic";
+
+import { ProfilePic } from "../components/profile-pic";
 import { trpc } from "../utils/trpc";
+import { cx } from "../utils/cx";
+import { Check, Copy, Github, Loader2, X } from "lucide-react";
 import QRCode from "react-qr-code";
 
 type Preview = {
@@ -20,6 +21,7 @@ const Home: NextPage = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [previews, setPreviews] = useState<Preview[]>([]);
   const upload = trpc.images.upload.useMutation();
+  const deleteImage = trpc.images.deleteBySlug.useMutation();
   const session = useSession();
 
   const preventDefaults = (e: React.DragEvent) => {
@@ -88,17 +90,30 @@ const Home: NextPage = () => {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const upload = uploadUrls[i];
-      const res = await fetch(upload.url, {
-        method: "PUT",
-        body: file,
-      });
-      if (!res.ok) throw Error("Failed to upload");
-      setPreviews(
-        produce((draft) => {
-          const index = draft.findIndex((p) => p.id === images[i].slug);
-          if (index > -1) draft[index].done = true;
-        })
-      );
+      try {
+        const res = await fetch(upload.url, {
+          method: "PUT",
+          body: file,
+        });
+        if (!res.ok) throw Error(res.statusText);
+        setPreviews(
+          produce((draft) => {
+            const index = draft.findIndex((p) => p.id === images[i].slug);
+            if (index > -1) draft[index].done = true;
+          })
+        );
+      } catch (err) {
+        console.error(err);
+        deleteImage.mutate(upload.slug);
+        setPreviews(
+          produce((draft) => {
+            const index = draft.findIndex((p) => p.id === images[i].slug);
+            if (index > -1) draft.splice(index, 1);
+          })
+        );
+        alert("Upload failed");
+        break;
+      }
     }
   };
 
@@ -151,56 +166,30 @@ const Home: NextPage = () => {
             </p>
           </div>
         </div>
-        {session.status === "unauthenticated" ? (
-          <button
-            className="mt-4 flex w-full cursor-pointer items-center justify-center rounded bg-stone-900 py-2 text-center text-white"
-            onClick={() => signIn("github")}
-          >
-            <GithubIcon className="mr-2" />
-            Sign in with Github
-          </button>
-        ) : (
-          <div className="mt-2">&nbsp;</div>
-        )}
+
+        <button
+          className={cx(
+            "mt-4 flex w-full cursor-pointer items-center justify-center rounded border border-stone-900 py-2 text-center text-stone-900 transition",
+            session.status !== "unauthenticated" &&
+              "pointer-events-none opacity-0"
+          )}
+          onClick={() => signIn("github")}
+        >
+          <Github className="mr-2" />
+          Sign in with Github
+        </button>
       </div>
       {previews.length > 0 && (
-        <div className="absolute top-0 left-0 h-screen w-full animate-fade overflow-y-auto overflow-x-hidden px-16 backdrop-blur-sm backdrop-brightness-90 transition-all">
-          <CloseIcon
-            className="fixed top-4 right-4 cursor-pointer text-4xl text-white"
+        <div className="absolute left-0 top-0 h-screen w-full animate-fade overflow-y-auto overflow-x-hidden px-16 backdrop-blur-sm backdrop-brightness-90 transition-all">
+          <X
+            className="fixed right-4 top-4 cursor-pointer text-4xl text-white"
             onClick={() => {
               setPreviews([]);
               setIsDragging(false);
             }}
           />
           {previews.map((preview) => (
-            <div
-              key={preview.id}
-              className="mx-auto flex h-screen w-full max-w-3xl flex-col items-center justify-center"
-            >
-              <img className="rounded shadow-xl" src={preview.src} alt="" />
-              <div className="mt-12 flex items-center gap-2">
-                <div className="h-14 w-14 rounded bg-white p-2">
-                  <QRCode
-                    value={`https://tincy.pics/image/${preview.id}`}
-                    size={64}
-                    className="h-full w-full"
-                  />
-                </div>
-                <div
-                  className="flex cursor-pointer items-center justify-between rounded bg-white p-4 text-slate-700 shadow-xl w-[450px]"
-                  onClick={() =>
-                    navigator.clipboard.writeText(
-                      `https://i.tincy.pics/${preview.id}`
-                    )
-                  }
-                >
-                  {preview.done
-                    ? `https://i.tincy.pics/${preview.id}`
-                    : "Uploading..."}
-                  <CopyIcon className="ml-4" />
-                </div>
-              </div>
-            </div>
+            <Preview key={preview.id} {...preview} />
           ))}
         </div>
       )}
@@ -209,3 +198,38 @@ const Home: NextPage = () => {
 };
 
 export default Home;
+
+const Preview = ({ id, src, done }: Preview) => {
+  const [copied, setCopied] = useState(false);
+
+  return (
+    <div className="mx-auto flex h-screen w-full max-w-3xl flex-col items-center justify-center">
+      <img className="rounded shadow-xl" src={src} alt="" />
+      <div className="mt-12 flex items-center gap-2">
+        <div className="h-14 w-14 rounded bg-white p-2">
+          <QRCode
+            value={`https://tincy.pics/image/${id}`}
+            size={64}
+            className="h-full w-full"
+          />
+        </div>
+        <div
+          className="flex w-[450px] cursor-pointer items-center justify-between rounded bg-white p-4 text-slate-700 shadow-xl"
+          onClick={() => {
+            setCopied(true);
+            navigator.clipboard.writeText(`https://i.tincy.pics/${id}`);
+          }}
+        >
+          <span className="mr-4">https://i.tincy.pics/{id}</span>
+          {copied ? (
+            <Check className="h-4 w-4" />
+          ) : done ? (
+            <Copy className="h-4 w-4" />
+          ) : (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};

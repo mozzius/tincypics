@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
-import { FiChevronLeft as BackIcon } from "react-icons/fi";
+
 import { Image, User } from "@prisma/client";
+import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 
 interface Props {
@@ -9,11 +10,12 @@ interface Props {
 
 export const ProfileHeader = ({ user }: Props) => {
   return (
-    <header className="m-auto mt-32 mb-4 flex w-full max-w-screen-lg items-end border-b-4 border-blue-400 pb-6 ">
-      <Link href="/">
-        <a className="absolute top-4 cursor-pointer rounded-full p-2 transition-colors hover:bg-slate-100">
-          <BackIcon className="h-6 w-6" />
-        </a>
+    <header className="container mx-auto mb-4 mt-32 flex w-full max-w-4xl items-end border-b-4 border-blue-400 px-4 pb-6 ">
+      <Link
+        href="/"
+        className="absolute top-4 cursor-pointer rounded-full p-2 transition-colors hover:bg-slate-100"
+      >
+        <ChevronLeft className="h-6 w-6" />
       </Link>
       {user ? (
         <>
