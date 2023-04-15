@@ -10,7 +10,7 @@ interface Props {
 
 export const ProfileHeader = ({ user }: Props) => {
   return (
-    <header className="container mx-auto mb-4 mt-32 flex w-full max-w-4xl items-end border-b-4 border-blue-400 px-4 pb-6 ">
+    <header className="container mx-auto mb-4 mt-16 md:mt-32 flex w-full max-w-4xl items-end border-b-4 border-blue-400 px-4 pb-6 ">
       <Link
         href="/"
         className="absolute top-4 cursor-pointer rounded-full p-2 transition-colors hover:bg-slate-100"
