@@ -20,14 +20,10 @@ const ProfilePage: NextPage = () => {
     return <div>Not found</div>;
   }
 
-  const activeImage = query.activeImage as string | undefined;
-
-  if (activeImage) alert(activeImage);
-
   return (
     <main className="flex h-screen flex-col px-4">
       <ProfileHeader user={profile.data} />
-      <div className="mx-auto flex w-full max-w-4xl container flex-grow px-4">
+      <div className="container mx-auto flex w-full max-w-4xl flex-grow px-4">
         <nav className="w-48 flex-shrink-0">
           <ul className="mr-4 list-none">
             <li className="w-full">
@@ -64,8 +60,7 @@ const ProfilePage: NextPage = () => {
             profile.data.images.map((image) => (
               <Link
                 key={image.id}
-                href={`/profile/${query.id}?activeImage=${image.slug}`}
-                as={`/image/${image.slug}`}
+                href={`/image/${image.slug}`}
                 className="aspect-square cursor-pointer overflow-hidden rounded shadow"
               >
                 <img

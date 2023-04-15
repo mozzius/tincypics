@@ -36,7 +36,7 @@ const ImagePage: NextPage = () => {
     <main className="flex min-h-screen flex-col">
       <div className="container mx-auto flex w-full max-w-4xl flex-grow flex-col p-4">
         <Link
-          href="/"
+          href={`/profile/${image.data.userId}`}
           className="absolute top-4 cursor-pointer rounded-full p-2 transition-colors hover:bg-slate-100"
         >
           <ChevronLeft className="h-6 w-6" />
@@ -48,11 +48,11 @@ const ImagePage: NextPage = () => {
             alt={image.data?.caption ?? ""}
           />
         </div>
-        <div className="mt-4 flex justify-between gap-4 flex-wrap">
+        <div className="mt-4 flex flex-wrap justify-between gap-4">
           {image.data.user && (
             <Link
               href={`/profile/${image.data.user.id}`}
-              className="flex h-12 cursor-pointer items-center rounded p-4 text-slate-700 border"
+              className="flex h-12 cursor-pointer items-center rounded border p-4 text-slate-700"
             >
               {image.data.user.image && (
                 <img
@@ -66,7 +66,7 @@ const ImagePage: NextPage = () => {
           )}
           <div className="flex gap-4">
             <button
-              className="flex h-12 w-12 cursor-pointer items-center rounded p-4 text-slate-700 border"
+              className="flex h-12 w-12 cursor-pointer items-center rounded border p-4 text-slate-700"
               onClick={() => {
                 setCopied(true);
                 navigator.clipboard.writeText(
@@ -78,7 +78,7 @@ const ImagePage: NextPage = () => {
             </button>
             {isMe && (
               <button
-                className="flex h-12 w-12 cursor-pointer items-center rounded p-4 text-slate-700 border disabled:bg-slate-100"
+                className="flex h-12 w-12 cursor-pointer items-center rounded border p-4 text-slate-700 disabled:bg-slate-100"
                 onClick={() => deleteImg.mutate(image.data.id)}
                 disabled={deleteImg.isLoading}
               >
