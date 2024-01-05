@@ -180,7 +180,7 @@ const Home: NextPage = () => {
         </button>
       </div>
       {previews.length > 0 && (
-        <div className="absolute left-0 top-0 h-screen w-full animate-fade overflow-y-auto overflow-x-hidden px-16 backdrop-blur-sm backdrop-brightness-90 transition-all">
+        <div className="absolute left-0 top-0 h-screen w-full animate-fade overflow-y-auto overflow-x-hidden px-4 backdrop-blur-sm backdrop-brightness-90 transition-all sm:px-8 md:px-16">
           <X
             className="fixed right-4 top-4 cursor-pointer text-4xl text-white"
             onClick={() => {
@@ -203,10 +203,10 @@ const Preview = ({ id, src, done }: Preview) => {
   const [copied, setCopied] = useState(false);
 
   return (
-    <div className="mx-auto flex h-screen w-full max-w-3xl flex-col items-center justify-center">
+    <div className="mx-auto flex h-screen w-full max-w-3xl flex-col items-center justify-center px-4">
       <img className="rounded shadow-xl" src={src} alt="" />
       <div className="mt-12 flex items-center gap-2">
-        <div className="h-14 w-14 rounded bg-white p-2">
+        <div className="hidden h-14 w-14 rounded bg-white p-2 sm:block">
           <QRCode
             value={`https://tincy.pics/image/${id}`}
             size={64}
@@ -214,19 +214,19 @@ const Preview = ({ id, src, done }: Preview) => {
           />
         </div>
         <div
-          className="flex w-[450px] cursor-pointer items-center justify-between rounded bg-white p-4 text-slate-700 shadow-xl"
+          className="flex w-full max-w-[450px] cursor-pointer items-center justify-between rounded bg-white p-4 text-slate-700 shadow-xl"
           onClick={() => {
             setCopied(true);
             navigator.clipboard.writeText(`https://i.tincy.pics/${id}`);
           }}
         >
-          <span className="mr-4">https://i.tincy.pics/{id}</span>
+          <span className="mr-4 line-clamp-1 break-all">https://i.tincy.pics/{id}</span>
           {copied ? (
-            <Check className="h-4 w-4" />
+            <Check className="h-4 w-4 shrink-0" />
           ) : done ? (
-            <Copy className="h-4 w-4" />
+            <Copy className="h-4 w-4 shrink-0" />
           ) : (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
           )}
         </div>
       </div>
