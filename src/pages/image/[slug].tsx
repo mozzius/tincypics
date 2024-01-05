@@ -1,11 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
+import { useState } from "react";
 import { NextPage } from "next";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { trpc } from "../../utils/trpc";
-import { useState } from "react";
 import { Check, ChevronLeft, Copy, Trash } from "lucide-react";
+import { useSession } from "next-auth/react";
+
+import { trpc } from "../../utils/trpc";
 
 const ImagePage: NextPage = () => {
   const { query, push } = useRouter();
@@ -70,7 +71,7 @@ const ImagePage: NextPage = () => {
               onClick={() => {
                 setCopied(true);
                 navigator.clipboard.writeText(
-                  `https://i.tincy.pics/${image.data.slug}`
+                  `https://i.tincy.pics/${image.data.slug}`,
                 );
               }}
             >

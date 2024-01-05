@@ -1,6 +1,7 @@
-import { z } from "zod";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { z } from "zod";
+
 import { env } from "../../../env/server.mjs";
 import { protectedProcedure, publicProcedure, router } from "../trpc";
 
@@ -21,7 +22,7 @@ export const imagesRouter = router({
           width: z.number(),
           height: z.number(),
         })
-        .array()
+        .array(),
     )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session?.user?.id;
@@ -36,7 +37,7 @@ export const imagesRouter = router({
               slug,
               url: await getSignedUrl(client, command, { expiresIn: 3600 }),
             };
-          })
+          }),
         ),
         await ctx.prisma.image.createMany({
           data: input.map((images) => ({

@@ -1,15 +1,15 @@
 /* eslint-disable @next/next/no-img-element */
-import cuid from "cuid";
-import produce from "immer";
-import type { NextPage } from "next";
-import { signIn, useSession } from "next-auth/react";
 import { useState } from "react";
+import type { NextPage } from "next";
+import cuid from "cuid";
+import { produce } from "immer";
+import { Check, Copy, Github, Loader2, X } from "lucide-react";
+import { signIn, useSession } from "next-auth/react";
+import QRCode from "react-qr-code";
 
 import { ProfilePic } from "../components/profile-pic";
-import { trpc } from "../utils/trpc";
 import { cx } from "../utils/cx";
-import { Check, Copy, Github, Loader2, X } from "lucide-react";
-import QRCode from "react-qr-code";
+import { trpc } from "../utils/trpc";
 
 type Preview = {
   id: string;
@@ -33,7 +33,7 @@ const Home: NextPage = () => {
     preventDefaults(evt);
 
     const files = [...evt.dataTransfer.files].filter((file) =>
-      file.type.startsWith("image/")
+      file.type.startsWith("image/"),
     );
 
     if (files.length) {
@@ -47,7 +47,7 @@ const Home: NextPage = () => {
     evt.preventDefault();
 
     const files = [...(evt.target.files ?? [])].filter((file) =>
-      file.type.startsWith("image/")
+      file.type.startsWith("image/"),
     );
     if (files.length) {
       uploadFiles(files);
@@ -73,7 +73,7 @@ const Home: NextPage = () => {
             setPreviews(
               produce((draft) => {
                 draft.push({ id, src, done: false });
-              })
+              }),
             );
             const img = new Image();
             img.onload = () =>
@@ -83,7 +83,7 @@ const Home: NextPage = () => {
           reader.readAsDataURL(file);
         });
         return { slug: id, width, height };
-      })
+      }),
     );
     for (let i = 0; i < files.length; i++) {}
     const uploadUrls = await upload.mutateAsync(images);
@@ -100,7 +100,7 @@ const Home: NextPage = () => {
           produce((draft) => {
             const index = draft.findIndex((p) => p.id === images[i].slug);
             if (index > -1) draft[index].done = true;
-          })
+          }),
         );
       } catch (err) {
         console.error(err);
@@ -109,7 +109,7 @@ const Home: NextPage = () => {
           produce((draft) => {
             const index = draft.findIndex((p) => p.id === images[i].slug);
             if (index > -1) draft.splice(index, 1);
-          })
+          }),
         );
         alert("Upload failed");
         break;
@@ -144,7 +144,7 @@ const Home: NextPage = () => {
             onDragOver={(evt) => {
               preventDefaults(evt);
               setIsDragging(
-                evt.dataTransfer.items && evt.dataTransfer.items.length > 0
+                evt.dataTransfer.items && evt.dataTransfer.items.length > 0,
               );
             }}
             onDragLeave={(evt) => {
@@ -171,7 +171,7 @@ const Home: NextPage = () => {
           className={cx(
             "mt-4 flex w-full cursor-pointer items-center justify-center rounded border border-stone-900 py-2 text-center text-stone-900 transition",
             session.status !== "unauthenticated" &&
-              "pointer-events-none opacity-0"
+              "pointer-events-none opacity-0",
           )}
           onClick={() => signIn("github")}
         >

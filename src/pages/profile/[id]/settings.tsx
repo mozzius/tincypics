@@ -1,9 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
+import { useEffect } from "react";
 import { NextPage } from "next";
-import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { signOut, useSession } from "next-auth/react";
+
 import { ProfileHeader } from "../../../components/profile-header";
 import { trpc } from "../../../utils/trpc";
 

@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
-import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 export const ProfilePic = () => {
   const { data, status } = useSession();

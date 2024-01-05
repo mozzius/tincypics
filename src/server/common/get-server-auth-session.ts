@@ -2,6 +2,7 @@
 
 import type { GetServerSidePropsContext } from "next";
 import { unstable_getServerSession } from "next-auth";
+
 import { authOptions as nextAuthOptions } from "../../pages/api/auth/[...nextauth]";
 
 // Next API route example - /pages/api/restricted.ts

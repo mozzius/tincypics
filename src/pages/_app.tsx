@@ -1,13 +1,16 @@
 // src/pages/_app.tsx
+import type { AppType } from "next/app";
 import { httpBatchLink } from "@trpc/client/links/httpBatchLink";
 import { loggerLink } from "@trpc/client/links/loggerLink";
 import { withTRPC } from "@trpc/next";
+import type { Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
 import superjson from "superjson";
-import type { AppType } from "next/app";
-import type { Session } from "next-auth";
+
 import "../styles/globals.css";
+
 import Head from "next/head";
+
 import { AppRouter } from "../server/trpc/router/_app";
 
 const MyApp: AppType<{ session: Session | null }> = ({

@@ -1,4 +1,5 @@
 import Link from "next/link";
+
 import { prisma } from "../../server/db/client";
 
 export default async function AdminPage() {
@@ -22,7 +23,7 @@ export default async function AdminPage() {
 
   const totalImages = users.reduce(
     (total, user) => total + user._count.images,
-    0
+    0,
   );
 
   return (

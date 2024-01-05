@@ -4,7 +4,7 @@ import { prisma } from "../../../server/db/client";
 
 export default async function redirectRoute(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   const slug = req.query.slug as string;
 
